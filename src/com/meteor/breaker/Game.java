@@ -15,13 +15,20 @@ package com.meteor.breaker;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
 import java.io.File;
-public class Game extends Canvas implements  Runnable{
-    public static final int WIDTH = 800, HEIGHT = 600;
-    public enum STATE{
+import java.util.logging.Logger;
+import org.lwjgl.Sys;
+
+public class Game extends Canvas implements Runnable {
+
+    public static final int WIDTH = 800,
+        HEIGHT = 600;
+
+    public enum STATE {
         START,
         PLAY,
         OVER,
     }
+
     private Menu menu;
     public static STATE state;
     private Thread thread;
@@ -30,31 +37,34 @@ public class Game extends Canvas implements  Runnable{
     private Boolean isRunning = false;
     private Handler handler;
 
-    public  Game() {
-       
+    public static GameObject rootGameObject;
+    private boolean recalculateDimensions = true;
+
+    public Game() {
         AudioPlayer.load();
-        AudioPlayer.getMusic("background").loop((float)1,(float)10);
+        AudioPlayer.getMusic("background").loop((float) 1, (float) 10);
         state = STATE.START;
         this.requestFocus();
         handler = new Handler();
-        new Window(WIDTH,HEIGHT,"MeteorBreaker",this);
-        handler.add(new Clouds(200,200,ID.Cloud,handler,Color.lightGray));
-        handler.add(new background(WIDTH/2,0,ID.background,handler));
-        handler.add(new Ground(0,0,ID.ground,handler));
+
+        handler.add(new Clouds(200, 200, ID.Cloud, handler, Color.lightGray));
+        handler.add(new background(WIDTH / 2, 0, ID.background, handler));
+        handler.add(new Ground(0, 0, ID.ground, handler));
         hod = new HOD(handler);
-        spawner = new Spawner(handler,hod);
-        menu = new Menu(handler,hod);
+        spawner = new Spawner(handler, hod);
+        menu = new Menu(handler, hod);
         this.addKeyListener(new keyListener(handler));
         this.requestFocusInWindow();
-        this.addMouseListener(new mouseListener(handler,menu));
+        this.addMouseListener(new mouseListener(handler, menu));
     }
 
-            public static void main(String args[])
-             {
-               System.out.println("main : "+System.getProperty("java.library.path"));
-                Game game = new Game();
-             }
-    
+    public static void main(String args[]) {
+        System.out.println("main : " + System.getProperty("java.library.path"));
+        Game game = new Game();
+        Window gameWindow = new Window(WIDTH, HEIGHT, "MeteorBreaker", game);
+        game.start();
+    }
+
     public synchronized void start() {
         thread = new Thread(this);
         isRunning = true;
@@ -65,13 +75,9 @@ public class Game extends Canvas implements  Runnable{
         try {
             thread.join();
             isRunning = false;
-
         } catch (InterruptedException e) {
-
             e.printStackTrace();
-
         }
-
     }
 
     public void run() {
@@ -82,11 +88,11 @@ public class Game extends Canvas implements  Runnable{
         long timer = System.currentTimeMillis();
         int updates = 0;
         int frames = 0;
-        while(isRunning){
+        while (isRunning) {
             long now = System.nanoTime();
             delta += (now - lastTime) / ns;
             lastTime = now;
-            while(delta >= 1){
+            while (delta >= 1) {
                 tick();
                 updates++;
                 delta--;
@@ -94,28 +100,31 @@ public class Game extends Canvas implements  Runnable{
             render();
             frames++;
 
-            if(System.currentTimeMillis() - timer > 1000){
+            if (System.currentTimeMillis() - timer > 1000) {
                 timer += 1000;
-                //System.out.println("FPS: " + frames + " TICKS: " + updates);
+                System.out.println("FPS: " + frames + " TICKS: " + updates);
                 frames = 0;
-                updates = 0;}
+                updates = 0;
+            }
         }
     }
 
     private void render() {
         BufferStrategy bs = this.getBufferStrategy();
-        if(bs == null)
-        {
+        if (bs == null) {
             this.createBufferStrategy(3);
             return;
         }
 
+        int currentWidth = getParent().getWidth();
+        int currentHeight = getParent().getHeight();
+
         Graphics g = bs.getDrawGraphics();
         g.setColor(Color.cyan);
-        g.fillRect(0,0,WIDTH,HEIGHT);
+        g.fillRect(0, 0, currentWidth, currentHeight);
         handler.render(g);
         menu.render(g);
-        if(state == STATE.PLAY) {
+        if (state == STATE.PLAY) {
             hod.render(g);
         }
         g.dispose();
@@ -123,17 +132,30 @@ public class Game extends Canvas implements  Runnable{
     }
 
     private void tick() {
+        if (recalculateDimensions) {
+            System.out.println("[Game] Recalculating dimensions");
+            handler.calculateDimensions();
+            recalculateDimensions = false;
+        }
         handler.tick();
-        if(state != STATE.PLAY)
-                menu.tick(state);
-        if(state == STATE.PLAY) {
+        if (state != STATE.PLAY) menu.tick(state);
+        if (state == STATE.PLAY) {
             hod.tick();
             spawner.tick();
         }
     }
-    public static boolean checkCollide(GameObject temp1, GameObject temp2){
+
+    @Override
+    public void resize(Dimension d) {
+        super.resize(d);
+        System.out.println(
+            "[Game] Resizing game to: " + d.width + "x" + d.height
+        );
+        rootGameObject.setWidth(d.width);
+        recalculateDimensions = true;
+    }
+
+    public static boolean checkCollide(GameObject temp1, GameObject temp2) {
         return temp1.getBound().intersects(temp2.getBound());
     }
 }
-
-

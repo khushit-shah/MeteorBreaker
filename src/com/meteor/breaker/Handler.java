@@ -1,38 +1,61 @@
 package com.meteor.breaker;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
  * Created by Khushit on 5/17/2018.
  */
 public class Handler {
+
     public static LinkedList<GameObject> gameobj = new LinkedList<GameObject>();
+    private static LinkedList<GameObject> addQueue = new LinkedList<
+        GameObject
+    >();
+    private static LinkedList<GameObject> removeQueue = new LinkedList<
+        GameObject
+    >();
 
-    public void add(GameObject e) {
-        //if(e.id != ID.background)
-            gameobj.add(e);
-
+    public synchronized void add(GameObject e) {
+        addQueue.add(e);
     }
 
-    public void remove(GameObject e) {
-        gameobj.remove(e);
-    //   System.out.println(e + " is removed");
+    public synchronized void remove(GameObject e) {
+        removeQueue.add(e);
     }
 
-    public void render(Graphics g) {
-        for (int i = gameobj.size()-1; i >=0 ; i--) {
-            GameObject tempobj = gameobj.get(i);
-            //if(tempobj.id != ID.background)
-                tempobj.render(g);
-
+    public synchronized void render(Graphics g) {
+        for (GameObject tempobj : gameobj) {
+            tempobj.render(g);
         }
     }
 
-    public void tick() {
-        for (int i = 0; i < gameobj.size(); i++) {
-            GameObject tempobj = gameobj.get(i);
+    public synchronized void calculateDimensions() {
+        /* Should be in order of parent to child. */
+        for (GameObject tempobj : gameobj) {
+            tempobj.calculateDimensions();
+        }
+    }
+
+    public synchronized void tick() {
+        for (GameObject tempobj : gameobj) {
             tempobj.tick();
+        }
+
+        completeAdd();
+        completeRemove();
+    }
+
+    private synchronized void completeAdd() {
+        while (!addQueue.isEmpty()) {
+            gameobj.add(addQueue.poll());
+        }
+    }
+
+    private synchronized void completeRemove() {
+        while (!removeQueue.isEmpty()) {
+            gameobj.remove(removeQueue.poll());
         }
     }
 }
