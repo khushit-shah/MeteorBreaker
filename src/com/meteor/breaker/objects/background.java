@@ -2,7 +2,9 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Random;
 
 public class background extends GameObject {
@@ -10,15 +12,14 @@ public class background extends GameObject {
 
     public background(int x, int y, ID id, Handler handler) {
         super(x, y, id, handler);
-        useRelativeSize(100, 10);
         velY = 2;
-        width = randomWidth(x, 800);
+        setRelativeSizeFromPixels(randomWidth(x, scaleX(800)), scaleY(10));
     }
 
     @Override
     public void tick() {
         y += (int) velY;
-        if (y > 650) {
+        if (y > scaleY(650)) {
             handler.remove(this);
         }
     }
@@ -26,7 +27,7 @@ public class background extends GameObject {
     @Override
     public void render(Graphics g) {
         g.setColor(Color.white);
-        g.fillRoundRect(x, y, width, 10, 1, 1);
+        g.fillRoundRect(x, y, getWidth(), getHeight(), Math.max(1, scaleX(1)), Math.max(1, scaleY(1)));
     }
 
     @Override
@@ -37,10 +38,10 @@ public class background extends GameObject {
     private int randomWidth(int x, int maxWidth) {
         int currentX = x;
         while (true) {
-            if ((maxWidth - currentX) > 35) {
-                return random.nextInt(maxWidth - currentX - 35);
+            if ((maxWidth - currentX) > scaleX(35)) {
+                return random.nextInt(Math.max(1, maxWidth - currentX - scaleX(35)));
             }
-            currentX = Math.max(0, currentX - 10);
+            currentX = Math.max(0, currentX - scaleX(10));
         }
     }
 }

@@ -2,7 +2,9 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Random;
 
 public class Clouds extends GameObject {
@@ -11,7 +13,7 @@ public class Clouds extends GameObject {
 
     public Clouds(int x, int y, ID id, Handler handler, Color color) {
         super(x, y, id, handler);
-        useRelativeSize(100, 50);
+        useRelativeSize(125, 50);
         this.color = color;
     }
 
@@ -27,9 +29,9 @@ public class Clouds extends GameObject {
             }
         }
 
-        if (x > 850) {
-            handler.add(new Clouds(-100, random.nextInt(300), ID.Cloud, handler, Color.white));
-            handler.add(new Clouds(0, random.nextInt(250), ID.Cloud, handler, randomCloudColor()));
+        if (x > scaleX(850)) {
+            handler.add(new Clouds(-scaleX(100), random.nextInt(scaleY(300)), ID.Cloud, handler, Color.white));
+            handler.add(new Clouds(0, random.nextInt(scaleY(250)), ID.Cloud, handler, randomCloudColor()));
             handler.remove(this);
         }
     }
@@ -43,15 +45,19 @@ public class Clouds extends GameObject {
 
     @Override
     public void render(Graphics g) {
+        int cloudPartWidth = Math.max(1, getWidth() * 2 / 5);
+        int cloudPartHeight = getHeight();
+        int step = Math.max(1, cloudPartWidth / 2);
+
         g.setColor(color);
-        g.fillOval(x, y, 50, 50);
-        g.fillOval(x + 25, y, 50, 50);
-        g.fillOval(x + 50, y, 50, 50);
-        g.fillOval(x + 75, y, 50, 50);
+        g.fillOval(x, y, cloudPartWidth, cloudPartHeight);
+        g.fillOval(x + step, y, cloudPartWidth, cloudPartHeight);
+        g.fillOval(x + (2 * step), y, cloudPartWidth, cloudPartHeight);
+        g.fillOval(x + (3 * step), y, cloudPartWidth, cloudPartHeight);
     }
 
     @Override
     public Rectangle getBound() {
-        return new Rectangle(x, y, 50, 50);
+        return new Rectangle(x, y, getWidth(), getHeight());
     }
 }

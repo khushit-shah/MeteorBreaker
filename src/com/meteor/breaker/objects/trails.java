@@ -2,7 +2,11 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 public class trails extends GameObject {
     private final float life;
@@ -11,8 +15,7 @@ public class trails extends GameObject {
 
     public trails(int x, int y, ID id, Handler handler, int width, float life, Color color) {
         super(x, y, id, handler);
-        useRelativeSize(40, 32);
-        this.width = width;
+        setRelativeSizeFromPixels(width, scaleY(32));
         this.life = life;
         this.color = color;
     }
@@ -31,7 +34,7 @@ public class trails extends GameObject {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
         g.setColor(color);
-        g.fillRect(x, y, width, 32);
+        g.fillRect(x, y, getWidth(), getHeight());
         g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
     }
 

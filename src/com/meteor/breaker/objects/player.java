@@ -4,7 +4,9 @@ import com.meteor.breaker.AudioPlayer;
 import com.meteor.breaker.Game;
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.List;
 
 public class player extends GameObject {
@@ -42,17 +44,17 @@ public class player extends GameObject {
 
         x += (int) velX;
         if (!jump) {
-            y = GROUND_Y;
+            y = scaleY(GROUND_Y);
         } else {
-            if (y > JUMP_LIMIT && y <= GROUND_Y) {
-                y -= 5;
+            if (y > scaleY(JUMP_LIMIT) && y <= scaleY(GROUND_Y)) {
+                y -= scaleY(5);
             } else {
-                y += 1;
+                y += scaleY(1);
             }
         }
 
-        x = Math.max(0, Math.min(Game.WIDTH - 35, x));
-        y = Math.max(0, Math.min(GROUND_Y, y));
+        x = Math.max(0, Math.min(scaleX(Game.WIDTH - 35), x));
+        y = Math.max(0, Math.min(scaleY(GROUND_Y), y));
 
         if (health < 0) {
             AudioPlayer.getSound("Game_Over").play();
@@ -64,19 +66,19 @@ public class player extends GameObject {
     public void render(Graphics g) {
         if (!over) {
             g.setColor(color);
-            g.fillOval(x + 6, y - 20, 20, 20);
+            g.fillOval(x + scaleX(6), y - scaleY(20), scaleX(20), scaleY(20));
             g.fillRect(x, y, getWidth(), getHeight());
-            g.fillRect(x + 6, y + 32, 10, 20);
-            g.fillRect(x + 18, y + 32, 10, 20);
+            g.fillRect(x + scaleX(6), y + getHeight(), scaleX(10), scaleY(20));
+            g.fillRect(x + scaleX(18), y + getHeight(), scaleX(10), scaleY(20));
             g.drawRect(x, y, getWidth(), getHeight());
 
             if (shooting && bullets > 0) {
                 AudioPlayer.getSound("bullet").play(30f, 100f);
-                handler.add(new bullet(x + 8, y - 24, ID.bullet, handler));
+                handler.add(new bullet(x + scaleX(8), y - scaleY(24), ID.bullet, handler));
                 bullets--;
             }
         } else {
-            g.drawString("GAME OVER ", 400, 300);
+            g.drawString("GAME OVER ", scaleX(400), scaleY(300));
         }
     }
 

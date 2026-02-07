@@ -2,7 +2,9 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.List;
 import java.util.Random;
 
@@ -16,19 +18,18 @@ public class FollowBlock extends GameObject {
 
     public FollowBlock(int x, int y, ID id, Handler handler) {
         super(x, y, id, handler);
-        useRelativeSize(60, 30);
         velX = 2;
         velY = 3;
-        width = calculateWidth(x, 800);
+        setRelativeSizeFromPixels(calculateWidth(x, scaleX(800)), scaleY(30));
     }
 
     private int calculateWidth(int x, int maxWidth) {
         while (true) {
-            int w = random.nextInt(25) + MIN_WIDTH;
-            if ((maxWidth - (x + w)) > 35) {
+            int w = random.nextInt(scaleX(25)) + scaleX(MIN_WIDTH);
+            if ((maxWidth - (x + w)) > scaleX(35)) {
                 return w;
             }
-            x = Math.max(0, x - 10);
+            x = Math.max(0, x - scaleX(10));
         }
     }
 
@@ -50,7 +51,7 @@ public class FollowBlock extends GameObject {
             y += (int) ((diffY / distance) * velY);
         }
 
-        if (y >= 650) {
+        if (y >= scaleY(650)) {
             handler.remove(this);
             return;
         }
@@ -71,10 +72,10 @@ public class FollowBlock extends GameObject {
     @Override
     public void render(Graphics g) {
         g.setColor(Color.DARK_GRAY);
-        g.fillOval(x, y, width, 30);
+        g.fillOval(x, y, getWidth(), getHeight());
         g.setColor(Color.WHITE);
-        g.drawString(String.valueOf(health), x, y + 15);
-        handler.add(new trails(x, y, ID.trials, handler, width, 0.02f, Color.RED));
+        g.drawString(String.valueOf(health), x, y + Math.max(1, getHeight() / 2));
+        handler.add(new trails(x, y, ID.trials, handler, getWidth(), 0.02f, Color.RED));
 
         if (deathEffect) {
             deathCount++;

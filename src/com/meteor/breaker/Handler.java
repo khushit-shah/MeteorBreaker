@@ -80,7 +80,9 @@ public class Handler {
 
     private void completeAdd() {
         while (!addQueue.isEmpty()) {
-            gameObjects.add(addQueue.poll());
+            GameObject added = addQueue.poll();
+            added.calculateDimensions();
+            gameObjects.add(added);
         }
     }
 

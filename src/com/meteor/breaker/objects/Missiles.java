@@ -3,7 +3,9 @@ package com.meteor.breaker.objects;
 import com.meteor.breaker.AudioPlayer;
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import org.newdawn.slick.Sound;
 
 public class Missiles extends GameObject {
@@ -28,7 +30,7 @@ public class Missiles extends GameObject {
             return;
         }
 
-        if (y < -150) {
+        if (y < -scaleY(150)) {
             handler.remove(this);
             missileSound.stop();
         }
@@ -39,7 +41,8 @@ public class Missiles extends GameObject {
             handler.add(new deathObj(x, y, ID.deathobj, handler));
         }
         for (GameObject temp : handler.getObjectsSnapshot()) {
-            if (temp.getBound().intersects(x - 50, y - 50, 100, 100) && temp.id != ID.player && temp.id != ID.ground) {
+            if (temp.getBound().intersects(x - scaleX(50), y - scaleY(50), scaleX(100), scaleY(100))
+                && temp.id != ID.player && temp.id != ID.ground) {
                 handler.add(new deathObj(x, y, ID.deathobj, handler));
                 handler.remove(temp);
                 if (player != null) {
@@ -56,12 +59,12 @@ public class Missiles extends GameObject {
     @Override
     public void render(Graphics g) {
         g.setColor(Color.red);
-        g.fillRoundRect(x, y, 40, 100, 100, 50);
+        g.fillRoundRect(x, y, getWidth(), Math.max(1, getHeight() * 2 / 3), Math.max(1, getWidth()), Math.max(1, getHeight() / 3));
         g.setColor(Color.green);
-        g.fillRect(x, y + 60, 40, 100);
-        handler.add(new trails(x, y, ID.trials, handler, 40, 0.01f, Color.ORANGE));
+        g.fillRect(x, y + Math.max(1, getHeight() * 2 / 5), getWidth(), Math.max(1, getHeight() * 2 / 3));
+        handler.add(new trails(x, y, ID.trials, handler, getWidth(), 0.01f, Color.ORANGE));
         g.setColor(Color.black);
-        g.drawRect(x - 100, y - 100, 200, 120);
+        g.drawRect(x - scaleX(100), y - scaleY(100), scaleX(200), scaleY(120));
     }
 
     @Override

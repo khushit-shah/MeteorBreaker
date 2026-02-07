@@ -2,7 +2,9 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Random;
 
 public class bullet extends GameObject {
@@ -30,7 +32,7 @@ public class bullet extends GameObject {
     @Override
     public void render(Graphics g) {
         g.setColor(color);
-        g.fillOval(x, y, 12, 12);
+        g.fillOval(x, y, getWidth(), getHeight());
     }
 
     @Override

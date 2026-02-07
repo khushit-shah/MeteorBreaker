@@ -2,7 +2,9 @@ package com.meteor.breaker.objects;
 
 import com.meteor.breaker.Handler;
 import com.meteor.breaker.ID;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.util.Random;
 
 public class deathObj extends GameObject {
@@ -27,7 +29,7 @@ public class deathObj extends GameObject {
     @Override
     public void render(Graphics g) {
         g.setColor(Color.ORANGE);
-        g.fillOval(x, y, 50, 60);
+        g.fillOval(x, y, getWidth(), getHeight());
     }
 
     @Override
