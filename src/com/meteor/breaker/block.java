@@ -1,6 +1,8 @@
 package com.meteor.breaker;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class block extends GameObject{
@@ -22,8 +24,6 @@ public class block extends GameObject{
         Health = 200;
         r = new Random();
 
-  //      x = checkPrevious(x);
-
         width = calculateWidth(x,800);
         for(int i = 0; i< Handler.gameobj.size(); i++){
             if(Handler.gameobj.get(i).id == ID.player){
@@ -33,21 +33,6 @@ public class block extends GameObject{
         }
     }
 
-    /*private int checkPrevious(int x) {
-        for(int i = 0; i< handler.gameobj.size(); i++){
-            if(handler.gameobj.get(i).id == ID.block){
-                if(checkCollide()){
-                  return x+50;
-                    //  checkPrevious(x+ 20) ;
-                }
-                else{
-                    return x+2;
-                }
-            }
-        }
-        return x;
-    }
-*/
     private int calculateWidth(int x, int MAX_WIDTH) {
 
         while(true) {
@@ -66,18 +51,20 @@ public class block extends GameObject{
     @Override
     public void tick() {
         y += valy;
-        if (y >= 650) handler.remove(this);
-        for (int i = 0; i < Handler.gameobj.size(); i++) {
-            GameObject temp = Handler.gameobj.get(i);
-            if (temp.id == ID.bullet) {
-                if (Game.checkCollide(this,temp)) {
-                    Health -= 20;
-                    handler.remove(temp);
-                }
-            }
+        
+        if (y >= 650) {
+            handler.remove(this);
+            return;
+        }
+
+        List<GameObject> collidingBullets = Handler.getCollidingObjects(this, List.of(new ID[]{ID.bullet}));
+
+
+        for (GameObject bullet : collidingBullets) {
+            Health -= 20;
+            Handler.remove(bullet);
 
             if (Health < 0) {
-               // System.out.println("Health of block is zero");
                 deathEffect = true;
                 if(Health < 0) {
                     count++;
@@ -85,6 +72,7 @@ public class block extends GameObject{
                         player.setPoints(player.getPoints() + 100);
                 }
             }
+
         }
     }
     public void render(Graphics g) {

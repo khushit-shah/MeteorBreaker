@@ -154,8 +154,4 @@ public class Game extends Canvas implements Runnable {
         rootGameObject.setWidth(d.width);
         recalculateDimensions = true;
     }
-
-    public static boolean checkCollide(GameObject temp1, GameObject temp2) {
-        return temp1.getBound().intersects(temp2.getBound());
-    }
 }
