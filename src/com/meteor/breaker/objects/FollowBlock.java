@@ -1,0 +1,96 @@
+package com.meteor.breaker.objects;
+
+import com.meteor.breaker.Handler;
+import com.meteor.breaker.ID;
+import java.awt.*;
+import java.util.List;
+import java.util.Random;
+
+public class FollowBlock extends GameObject {
+    private static final int MIN_WIDTH = 40;
+    private final Random random = new Random();
+    private boolean deathEffect;
+    private int deathCount;
+    private int health = 200;
+    private player player;
+
+    public FollowBlock(int x, int y, ID id, Handler handler) {
+        super(x, y, id, handler);
+        useRelativeSize(60, 30);
+        velX = 2;
+        velY = 3;
+        width = calculateWidth(x, 800);
+    }
+
+    private int calculateWidth(int x, int maxWidth) {
+        while (true) {
+            int w = random.nextInt(25) + MIN_WIDTH;
+            if ((maxWidth - (x + w)) > 35) {
+                return w;
+            }
+            x = Math.max(0, x - 10);
+        }
+    }
+
+    @Override
+    public void tick() {
+        if (player == null) {
+            player = (player) handler.findFirstById(ID.player).orElse(null);
+        }
+        if (player == null) {
+            return;
+        }
+
+        int diffX = player.getX() - x;
+        int diffY = player.getY() - y;
+        float distance = (float) Math.sqrt((diffX * diffX) + (diffY * diffY));
+
+        if (distance > 0f) {
+            x += (int) ((diffX / distance) * velX);
+            y += (int) ((diffY / distance) * velY);
+        }
+
+        if (y >= 650) {
+            handler.remove(this);
+            return;
+        }
+
+        for (GameObject bullet : handler.getCollidingObjects(this, List.of(ID.bullet))) {
+            health -= 20;
+            handler.remove(bullet);
+        }
+
+        if (health < 0) {
+            deathEffect = true;
+            if (deathCount < 3) {
+                player.setPoints(player.getPoints() + 100);
+            }
+        }
+    }
+
+    @Override
+    public void render(Graphics g) {
+        g.setColor(Color.DARK_GRAY);
+        g.fillOval(x, y, width, 30);
+        g.setColor(Color.WHITE);
+        g.drawString(String.valueOf(health), x, y + 15);
+        handler.add(new trails(x, y, ID.trials, handler, width, 0.02f, Color.RED));
+
+        if (deathEffect) {
+            deathCount++;
+            handler.add(new deathObj(x, y, ID.deathobj, handler));
+            if (deathCount > 5) {
+                handler.remove(this);
+            }
+        }
+    }
+
+    @Override
+    public Rectangle getBound() {
+        return new Rectangle(x, y, getWidth(), getHeight());
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+}

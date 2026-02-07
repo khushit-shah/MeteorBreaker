@@ -1,83 +1,92 @@
 package com.meteor.breaker;
 
-import java.awt.*;
-import java.util.List;
+import com.meteor.breaker.objects.GameObject;
+import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.logging.Logger;
-import java.util.logging.Level;
 
-/**
- * Created by Khushit on 5/17/2018.
- */
 public class Handler {
+    private static final Logger LOGGER = Log.getLogger(Handler.class);
 
-    private static Logger logger = Logger.getLogger(Handler.class.getName());
+    private final LinkedList<GameObject> gameObjects = new LinkedList<>();
+    private final LinkedList<GameObject> addQueue = new LinkedList<>();
+    private final LinkedList<GameObject> removeQueue = new LinkedList<>();
 
-    public static LinkedList<GameObject> gameobj = new LinkedList<GameObject>();
-    private static LinkedList<GameObject> addQueue = new LinkedList<
-        GameObject
-    >();
-    private static LinkedList<GameObject> removeQueue = new LinkedList<
-        GameObject
-    >();
-
-    public static synchronized void add(GameObject e) {
-        logger.info("Object " + e + " added to addQueue.");
-        addQueue.add(e);
+    public synchronized void add(GameObject object) {
+        addQueue.add(object);
     }
 
-    public static synchronized void remove(GameObject e) {
-        logger.info("Object " + e + " removed addQueue.");
-        removeQueue.add(e);
+    public synchronized void remove(GameObject object) {
+        removeQueue.add(object);
     }
 
-    public static synchronized void render(Graphics g) {
-        for (GameObject tempobj : gameobj) {
-            tempobj.render(g);
+    public synchronized void render(Graphics graphics) {
+        for (GameObject object : gameObjects) {
+            object.render(graphics);
         }
     }
 
-    public static synchronized void calculateDimensions() {
-        /* Should be in order of parent to child. */
-        for (GameObject tempobj : gameobj) {
-            tempobj.calculateDimensions();
+    public synchronized void calculateDimensions() {
+        for (GameObject object : gameObjects) {
+            object.calculateDimensions();
         }
     }
 
-    public static List<GameObject> getCollidingObjects(GameObject e, List<ID> filter) {
-        ArrayList<GameObject> collidingObjects = new ArrayList<>();
-
-        for (final GameObject temp : gameobj) {
-            if (temp != e && filter.contains(temp.id) && temp.getBound().intersects(e.getBound())) {
-                collidingObjects.add(temp);
+    public synchronized List<GameObject> getCollidingObjects(GameObject source, List<ID> filter) {
+        ArrayList<GameObject> collisions = new ArrayList<>();
+        for (GameObject object : gameObjects) {
+            if (object != source && filter.contains(object.id) && object.getBound().intersects(source.getBound())) {
+                collisions.add(object);
             }
         }
-
-        return collidingObjects;
+        return collisions;
     }
 
-    public static synchronized void tick() {
+    public synchronized void tick() {
         completeAdd();
         completeRemove();
 
-        for (GameObject tempobj : gameobj) {
-            tempobj.tick();
+        for (GameObject object : gameObjects) {
+            object.tick();
         }
 
         completeAdd();
         completeRemove();
     }
 
-    private static synchronized void completeAdd() {
+    public synchronized Optional<GameObject> findFirstById(ID id) {
+        for (GameObject object : gameObjects) {
+            if (object.id == id) {
+                return Optional.of(object);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public synchronized List<GameObject> getObjectsSnapshot() {
+        return Collections.unmodifiableList(new ArrayList<>(gameObjects));
+    }
+
+    public synchronized void clear() {
+        LOGGER.info("Clearing all game objects and queues");
+        gameObjects.clear();
+        addQueue.clear();
+        removeQueue.clear();
+    }
+
+    private void completeAdd() {
         while (!addQueue.isEmpty()) {
-            gameobj.add(addQueue.poll());
+            gameObjects.add(addQueue.poll());
         }
     }
 
-    private static synchronized void completeRemove() {
+    private void completeRemove() {
         while (!removeQueue.isEmpty()) {
-            gameobj.remove(removeQueue.poll());
+            gameObjects.remove(removeQueue.poll());
         }
     }
 }

@@ -1,5 +1,7 @@
-package com.meteor.breaker;
+package com.meteor.breaker.objects;
 
+import com.meteor.breaker.Handler;
+import com.meteor.breaker.ID;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 
