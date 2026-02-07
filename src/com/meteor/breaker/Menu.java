@@ -8,12 +8,12 @@ import java.util.Random;
  */
 public class Menu {
 
-    private Random random;
+    private final Random random;
     private Game.STATE state;
-    private Handler handler;
+    private final Handler handler;
     private int count = 0,
         coutn1 = 0;
-    private HOD hod;
+    private final HOD hod;
     private boolean newGame = true;
 
     public Menu(Handler handler, HOD hod) {
@@ -24,9 +24,10 @@ public class Menu {
 
     public void tick(Game.STATE state) {
         this.state = state;
-        if (count % 50 == 0) handler.add(
-            new background(random.nextInt(800), 0, ID.background, handler)
-        );
+        count++;
+        if (count % 50 == 0) {
+            handler.add(new background(random.nextInt(800), 0, ID.background, handler));
+        }
     }
 
     public void render(Graphics g) {
@@ -46,18 +47,11 @@ public class Menu {
             coutn1++;
             g.setColor(Color.black);
             if (coutn1 < 3 && newGame) {
-                for (int i = 0; i < Handler.gameobj.size(); i++) {
-                    handler.remove(Handler.gameobj.get(i));
-                }
-                handler.gameobj.remove();
-                handler.add(
-                    new Clouds(200, 200, ID.Cloud, handler, Color.lightGray)
-                );
+                handler.clear();
+                handler.add(new Clouds(200, 200, ID.Cloud, handler, Color.lightGray));
                 handler.add(new Ground(0, 0, ID.ground, handler));
             }
-            handler.add(
-                new background(random.nextInt(800), 0, ID.background, handler)
-            );
+            handler.add(new background(random.nextInt(800), 0, ID.background, handler));
             g.setFont(new Font("Times New Roman", 100, 60));
             g.drawString("GAME OVER:-(", 200, 100);
             g.setColor(Color.black);
@@ -72,7 +66,7 @@ public class Menu {
 
     public void checkMouse(int x, int y) {
         if (state != Game.STATE.PLAY) {
-            if (x > 250 && x < 550) if (y > 200 && y < 290) {
+            if (x > 250 && x < 550 && y > 200 && y < 290) {
                 GameObject player = new player(300, 300, ID.player, handler);
                 player.setPoints(100);
                 player.setHealth(100);

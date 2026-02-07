@@ -20,8 +20,7 @@ public class Clouds extends GameObject {
     public void tick() {
         int count = 0;
         x++;
-        for (int i = 0; i < Handler.gameobj.size(); i++) {
-            GameObject temp = Handler.gameobj.get(i);
+        for (GameObject temp : handler.getObjectsSnapshot()) {
             if (temp.id == ID.Cloud) count++;
             if (count > 2 && temp.id == ID.Cloud) {
                 handler.remove(temp);

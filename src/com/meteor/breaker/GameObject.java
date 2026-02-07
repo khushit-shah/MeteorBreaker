@@ -73,24 +73,44 @@ public abstract class GameObject {
 
     public abstract void render(Graphics g);
 
-    public float valx() {
+    public float getVelX() {
         return valx;
     }
 
-    public float valy() {
+    public float getVelY() {
         return valy;
     }
 
-    public void setvalX(int valx) {
+    public float valx() {
+        return getVelX();
+    }
+
+    public float valy() {
+        return getVelY();
+    }
+
+    public void setVelX(int valx) {
         this.valx = valx;
     }
 
-    public void setvalY(int valy) {
+    public void setVelY(int valy) {
         this.valy = valy;
     }
 
-    public void strshoot(Handler handler) {
+    public void setvalX(int valx) {
+        setVelX(valx);
+    }
+
+    public void setvalY(int valy) {
+        setVelY(valy);
+    }
+
+    public void startShooting() {
         shooting = true;
+    }
+
+    public void strshoot(Handler handler) {
+        startShooting();
     }
 
     public void stopshooting() {
@@ -130,12 +150,8 @@ public abstract class GameObject {
             cachedCalculatedWidth = width;
             cachedCalculatedHeight = height;
         } else {
-            cachedCalculatedWidth = Math.round(
-                parent.getWidth() * relativeWidth
-            );
-            cachedCalculatedHeight = Math.round(
-                parent.getHeight() * relativeHeight
-            );
+            cachedCalculatedWidth = Math.round(parent.getWidth() * relativeWidth);
+            cachedCalculatedHeight = Math.round(parent.getHeight() * relativeHeight);
         }
     }
 
@@ -166,7 +182,7 @@ public abstract class GameObject {
     public abstract Rectangle getBound();
 
     public void shootMissile() {
-        if (Missiles > 0) {
+        if (Missiles > 0 && handler != null) {
             handler.add(new Missiles(x, y, ID.Missile, handler));
             Missiles--;
         }

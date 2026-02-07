@@ -9,90 +9,62 @@ import java.awt.event.KeyListener;
 
 public class keyListener implements KeyListener {
     private GameObject player;
-    private Handler handler;
-    public keyListener(Handler handler){
+    private final Handler handler;
+
+    public keyListener(Handler handler) {
         this.handler = handler;
     }
+
+    private GameObject findPlayer() {
+        player = handler.findFirstById(ID.player).orElse(null);
+        return player;
+    }
+
+    @Override
     public void keyTyped(KeyEvent e) {
-        synchronized (e) {
-            for(int i=0;i<Handler.gameobj.size(); i++)
-            {
-                if(Handler.gameobj.get(i).id == ID.player){
-                    player = Handler.gameobj.get(i);
-                    break;
-                }
-            }
-            char keycode = e.getKeyChar();
-            if(keycode  == 'w') player.setvalY((int) (player.valy()-5));
-            if(keycode  == 's') player.setvalY((int) (player.valy()+5));
-            if(keycode  == 'a') player.setvalX((int) (player.valx()-5));
-            if(keycode  == 'd') player.setvalX((int) (player.valx()+5));
-            if(keycode ==  'm') player.shootMissile();
-            if(keycode == ' ') player.strshoot(handler);
-            //if(keycode == 'h') {
-             //   if(player.getPoints() >= 1000){
-               //     player.setHealth(player.getHealth() + 100);
-                //    player.setPoints(player.getPoints() - 1000);
-                //}
-           // }
-            //System.out.println(keycode + "\n" + e);
-            if(keycode == 'b') {
-                if(player.getPoints() >= 700){
-                    player.setBullets(player.getBullets() + 1000);
-                    player.setPoints(player.getPoints() - 700);
-                }
-            }
-            if(keycode  == '\n') player.jump();
-        }
-
+        handleKey(e, false);
     }
+
+    @Override
     public void keyPressed(KeyEvent e) {
-        synchronized (e) {
-            for(int i=0;i<Handler.gameobj.size(); i++)
-            {
-                if(Handler.gameobj.get(i).id == ID.player){
-                    player = Handler.gameobj.get(i);
-                    break;
-                }
-            }
-            char keycode = e.getKeyChar();
-            if(keycode  == 'w') player.setvalY((int) (player.valy()-5));
-            if(keycode  == 's') player.setvalY((int) (player.valy()+5));
-            if(keycode  == 'a') player.setvalX((int) (player.valx()-5));
-            if(keycode  == 'd') player.setvalX((int) (player.valx()+5));
-            if(keycode == ' ') player.strshoot(handler);
-           // if(keycode == 'h') {
-             //   if(player.getPoints() >= 10000){
-               //     player.setHealth(player.getHealth() + 100);
-                 //   player.setPoints(player.getPoints() - 10000);
-                //}
-            //}
-            if(keycode == 'b') {
-                if(player.getPoints() >= 70000){
-                    player.setBullets(player.getBullets() + 1000);
-                    player.setPoints(player.getPoints() - 7000);
-                }
-            }
-            if(keycode == KeyEvent.VK_ENTER) player.jump();
-
-        }
+        handleKey(e, false);
     }
-    public void keyReleased(KeyEvent e) {
-        synchronized (e) {
-            for(int i=0;i<Handler.gameobj.size(); i++)
-            {
-                if(Handler.gameobj.get(i).id == ID.player){
-                    player = Handler.gameobj.get(i);
-                    break;
-                }
-            }
-            char keycode = e.getKeyChar();
-            if(keycode  == 'w') player.setvalY(0);
-            if(keycode  == 's') player.setvalY(0);
-            if(keycode  == 'a') player.setvalX(0);
-            if(keycode  == 'd') player.setvalX(0);
-            if(keycode == ' ') player.stopshooting();
-            if(keycode  == '\n') player.returnJump();
 
-        } }
+    @Override
+    public void keyReleased(KeyEvent e) {
+        handleKey(e, true);
+    }
+
+    private void handleKey(KeyEvent e, boolean released) {
+        GameObject currentPlayer = findPlayer();
+        if (currentPlayer == null) {
+            return;
+        }
+
+        int keyCode = e.getKeyCode();
+        char keyChar = e.getKeyChar();
+
+        if (released) {
+            if (keyChar == 'w' || keyChar == 's') currentPlayer.setvalY(0);
+            if (keyChar == 'a' || keyChar == 'd') currentPlayer.setvalX(0);
+            if (keyChar == ' ') currentPlayer.stopshooting();
+            if (keyCode == KeyEvent.VK_ENTER || keyChar == '\n') currentPlayer.returnJump();
+            return;
+        }
+
+        if (keyChar == 'w') currentPlayer.setvalY((int) (currentPlayer.valy() - 5));
+        if (keyChar == 's') currentPlayer.setvalY((int) (currentPlayer.valy() + 5));
+        if (keyChar == 'a') currentPlayer.setvalX((int) (currentPlayer.valx() - 5));
+        if (keyChar == 'd') currentPlayer.setvalX((int) (currentPlayer.valx() + 5));
+        if (keyChar == 'm') currentPlayer.shootMissile();
+        if (keyChar == ' ') currentPlayer.strshoot(handler);
+
+        if (keyChar == 'b') {
+            if (currentPlayer.getPoints() >= 700) {
+                currentPlayer.setBullets(currentPlayer.getBullets() + 1000);
+                currentPlayer.setPoints(currentPlayer.getPoints() - 700);
+            }
+        }
+        if (keyCode == KeyEvent.VK_ENTER || keyChar == '\n') currentPlayer.jump();
+    }
 }
