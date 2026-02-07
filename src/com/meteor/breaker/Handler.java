@@ -1,54 +1,45 @@
 package com.meteor.breaker;
 
 import java.awt.*;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
-import java.util.logging.Logger;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Khushit on 5/17/2018.
  */
 public class Handler {
+    private final LinkedList<GameObject> gameObjects = new LinkedList<GameObject>();
+    private final LinkedList<GameObject> addQueue = new LinkedList<GameObject>();
+    private final LinkedList<GameObject> removeQueue = new LinkedList<GameObject>();
 
-    private static Logger logger = Logger.getLogger(Handler.class.getName());
-
-    public static LinkedList<GameObject> gameobj = new LinkedList<GameObject>();
-    private static LinkedList<GameObject> addQueue = new LinkedList<
-        GameObject
-    >();
-    private static LinkedList<GameObject> removeQueue = new LinkedList<
-        GameObject
-    >();
-
-    public static synchronized void add(GameObject e) {
-        logger.info("Object " + e + " added to addQueue.");
+    public synchronized void add(GameObject e) {
         addQueue.add(e);
     }
 
-    public static synchronized void remove(GameObject e) {
-        logger.info("Object " + e + " removed addQueue.");
+    public synchronized void remove(GameObject e) {
         removeQueue.add(e);
     }
 
-    public static synchronized void render(Graphics g) {
-        for (GameObject tempobj : gameobj) {
+    public synchronized void render(Graphics g) {
+        for (GameObject tempobj : gameObjects) {
             tempobj.render(g);
         }
     }
 
-    public static synchronized void calculateDimensions() {
+    public synchronized void calculateDimensions() {
         /* Should be in order of parent to child. */
-        for (GameObject tempobj : gameobj) {
+        for (GameObject tempobj : gameObjects) {
             tempobj.calculateDimensions();
         }
     }
 
-    public static List<GameObject> getCollidingObjects(GameObject e, List<ID> filter) {
+    public synchronized List<GameObject> getCollidingObjects(GameObject e, List<ID> filter) {
         ArrayList<GameObject> collidingObjects = new ArrayList<>();
 
-        for (final GameObject temp : gameobj) {
+        for (final GameObject temp : gameObjects) {
             if (temp != e && filter.contains(temp.id) && temp.getBound().intersects(e.getBound())) {
                 collidingObjects.add(temp);
             }
@@ -57,11 +48,11 @@ public class Handler {
         return collidingObjects;
     }
 
-    public static synchronized void tick() {
+    public synchronized void tick() {
         completeAdd();
         completeRemove();
 
-        for (GameObject tempobj : gameobj) {
+        for (GameObject tempobj : gameObjects) {
             tempobj.tick();
         }
 
@@ -69,15 +60,35 @@ public class Handler {
         completeRemove();
     }
 
-    private static synchronized void completeAdd() {
+    public synchronized Optional<GameObject> findFirstById(ID id) {
+        for (GameObject object : gameObjects) {
+            if (object.id == id) {
+                return Optional.of(object);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public synchronized List<GameObject> getObjectsSnapshot() {
+        return Collections.unmodifiableList(new ArrayList<>(gameObjects));
+    }
+
+    public synchronized void clear() {
+        gameObjects.clear();
+        addQueue.clear();
+        removeQueue.clear();
+    }
+
+    private synchronized void completeAdd() {
         while (!addQueue.isEmpty()) {
-            gameobj.add(addQueue.poll());
+            gameObjects.add(addQueue.poll());
         }
     }
 
-    private static synchronized void completeRemove() {
+    private synchronized void completeRemove() {
         while (!removeQueue.isEmpty()) {
-            gameobj.remove(removeQueue.poll());
+            gameObjects.remove(removeQueue.poll());
         }
     }
 }
